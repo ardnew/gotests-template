@@ -24,8 +24,7 @@ Add the following to key `go.generateTestsFlags` in `settings.json`:
 
 ```json
   "go.generateTestsFlags": [
-    "-template_dir=path/to/parallel", // or "serial"
-    "-i", // print test inputs in error messages
+    "-template_dir=path/to/parallel",
   ],
 ```
 
