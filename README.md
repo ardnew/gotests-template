@@ -1,17 +1,31 @@
 # gotests-template
 
-My template for cweill/gotests
+Templates for use with:
+ - [cweill/gotests](https://github.com/cweill/gotests)
 
-## Usage (VSCode)
+Based on original work from:
+ - [Ras96/gotests-template](https://github.com/Ras96/gotests-template)
 
-Add gotests settings to ./vscode/settings.json
-```txt
-{
-  ...,
-  "go.generateTestsFlags": [
-    "-template_dir",
-    "./path/to/Ras96/gotests-template/templates" // Or templates2
-  ],
-  ...
-}
+
+## Usage
+
+Specify the path to either the `parallel` or `serial` directory (from this repo) using flag `-template_dir`:
+
+```sh
+gotests -template_dir="path/to/parallel" path/to/go/sources
 ```
+
+See `gotests -h` for other flags.
+
+
+#### VS Code
+
+Add the following to key `go.generateTestsFlags` in `settings.json`:
+
+```json
+  "go.generateTestsFlags": [
+    "-template_dir=path/to/parallel", // or "serial"
+    "-i", // print test inputs in error messages
+  ],
+```
+
