@@ -3,22 +3,26 @@
 
 func {{.TestName}}(t *testing.T) {
 	t.Parallel()
-	{{- if .TestParameters}}
-	type args struct {
-		{{- range .TestParameters}}
-			{{Param .}} {{.Type}}
-		{{- end}}
-	}
-	{{- end}}
 	for name, tt := range map[string]struct {
 		{{with .Receiver}}{{Receiver .}} {{.Type}}{{end}}
-		{{if .TestParameters}}args args{{end}}
-		{{- range .TestResults}}
-			{{Want .}} {{.Type}}
+		{{- if .TestParameters}}
+			args struct {
+			{{- range .TestParameters}}
+				{{Param .}} {{.Type}}
+			{{- end}}
+			}
+		{{- end}}
+		{{- if .TestResults}}
+			{{- range .TestResults}}
+				{{Want .}} {{.Type}}
+			{{- end}}
+		{{- else}}
+			want {{.Receiver.Type}}
 		{{- end}}
 		{{if .ReturnsError}}wantErr bool{{end}}
 	}{
 		// TODO: Add test cases.
+		"": {},
 	} {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
@@ -35,19 +39,25 @@ func {{.TestName}}(t *testing.T) {
 					t.Errorf("wantErr(%t): error = %+v", tt.wantErr, err)
 				}
 			{{- end}}
-			{{- range .TestResults}}
-				if diff := cmp.Diff(tt.{{Want .}},
-				{{- if .IsWriter}}
-					{{Param .}}.String()
-				{{- else}}tt.
-					{{- if $f.OnlyReturnsOneValue}}
-						{{- template "inline" $f}}
+			{{- if .TestResults}}
+				{{- range .TestResults}}
+					if diff := cmp.Diff(tt.{{Want .}},
+					{{- if .IsWriter}}
+						{{Param .}}.String()
 					{{- else}}
-						{{- Got .}}
-					{{- end}}
-				{{- end}}); len(diff) > 0 {
-					t.Errorf("diff (-want +got):%s\n", diff)
-				}
+						{{- if $f.OnlyReturnsOneValue -}}
+							{{- template "inline" $f}}
+						{{- else}}
+							{{- Got .}}
+						{{- end}}
+					{{- end}}); len(diff) > 0 {
+						t.Errorf("diff (-want +got):%s\n", diff)
+					}
+				{{- end}}
+			{{- else}}
+				if diff := cmp.Diff(tt.want, tt.{{Receiver .Receiver}}); len(diff) > 0 {
+					t.Errorf("dirr (-want +got):%s\n", diff)
+				} 
 			{{- end}}
 		})
 	}
